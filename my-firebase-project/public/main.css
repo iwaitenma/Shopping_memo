@@ -1,0 +1,28 @@
+body {
+    font-family: 游ゴシック;
+}
+
+.List {
+    display: flex;
+    width: 400px;
+}
+
+.List div {
+    margin: 5px;
+    flex-grow: 1;
+}
+
+ul {
+  padding: 0;
+}
+
+ul li{
+  color: #404040;
+  border-left: solid 6px #87cefa;
+  background: rgb(241 241 241);
+  margin-bottom: 5px;
+  line-height: 1.5;
+  padding: 0.5em;
+  list-style-type: none!important;
+  font-weight: bold;
+}

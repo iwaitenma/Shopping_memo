@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>買い物リスト</title>
+    <meta http-equiv="content-type" charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="https://www.gstatic.com/firebasejs/5.8.6/firebase.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCadHdUv4L9ZEEw2gg7f5aZ-G6Nh-Jgsm4",
+          authDomain: "shopping-memo-c551e.firebaseapp.com",
+          databaseURL: "https://shopping-memo-c551e-default-rtdb.firebaseio.com",
+          projectId: "shopping-memo-c551e",
+          storageBucket: "shopping-memo-c551e.appspot.com",
+          messagingSenderId: "260417447172",
+          appId: "1:260417447172:web:914b9eae9c3686fbe31c51"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        var db = firebase.database();
+
+        var shoppingList = db.ref("/data"); //買い物リスト
+        var doneList = db.ref("/done"); //入手済みリスト
+
+        var count = db.ref("/count"); 
+        let itemCount1 = 0;
+        let itemCount2 = 0;
+
+
+        function deleteAll()
+        {
+            try
+            {
+                var element = document.getElementById("List1");
+                while (element)
+                {
+                    element.removeChild(element.childNodes.item(0));
+                }
+            }catch{
+                //pass
+            }
+            try
+            {
+                var element = document.getElementById("List2");
+                while (element)
+                {
+                    element.removeChild(element.childNodes.item(0));
+                }
+            }
+            catch{
+                //pass
+            }
+        }
+
+        function addData()
+        {
+            var item = document.getElementById("item").value;
+
+            shoppingList.push({item: item}); //setで書き換え 、pushで要素を追加
+            document.getElementById("item").value = "";
+
+            ListLoad();
+            updateCount();
+        };
+
+        function done()
+        {
+            for (var i = 0; i < itemCount1; i++)
+            {
+                try
+                {
+                    // i番目のチェックボックスがチェックされているかを判定
+                    if (document.form1.elements[i].checked)
+                    {
+                        let objectDone = document.form1.elements[i].value;
+
+                        shoppingList.on("value", function (snapshot)
+                        {
+                            snapshot.forEach(function (childSnapshot)
+                            {
+                                var childData = childSnapshot.val().item;
+
+                                if (objectDone == childData)
+                                {
+                                    shoppingList.child(childSnapshot.key).remove(); // .keyでIDを取得
+
+                                    doneList.push({item: childData}); //要素を追加
+
+                                }
+                            });
+                        });
+                    }
+                }
+                catch{
+                    //pass
+                }
+            }
+            ListLoad();
+            updateCount();
+        }
+
+        function deleteItem()
+        {
+            for (var i = 0; i < itemCount1; i++)
+            {
+                try
+                {
+                    // i番目のチェックボックスがチェックされているかを判定
+                    if (document.form1.elements[i].checked)
+                    {
+                        let objectShopping = document.form1.elements[i].value;
+
+                        shoppingList.on("value", function (snapshot)
+                        {
+                            snapshot.forEach(function (childSnapshot)
+                            {
+                                var childData = childSnapshot.val().item;
+
+                                if (objectShopping == childData)
+                                {
+                                    shoppingList.child(childSnapshot.key).remove();
+                                }
+                            });
+                        });
+                    }
+                }
+                catch{
+                    //pass
+                }
+            }
+            for (var i = 0; i < itemCount2; i++)
+            {
+                try
+                {
+                    // i番目のチェックボックスがチェックされているかを判定
+                    if (document.form2.elements[i].checked)
+                    {
+                        let objectDone = document.form2.elements[i].value;
+
+                        doneList.on("value", function (snapshot)
+                        {
+                            snapshot.forEach(function (childSnapshot)
+                            {
+                                var childData = childSnapshot.val().item;
+
+                                if (objectDone == childData)
+                                {
+                                    doneList.child(childSnapshot.key).remove();
+                                }
+                            });
+                        });
+                    }
+                }
+                catch{
+                    //pass
+                }
+            }
+            ListLoad();
+            updateCount();
+        }
+
+        function updateCount()
+        {
+            // 欲しいものリスト、入手済みリストのカウントを更新
+            itemCount1 = 0;
+            itemCount2 = 0;
+
+            shoppingList.on("value", function (snapshot)
+            {
+                snapshot.forEach(function (childSnapshot)
+                {
+                    itemCount1++;
+                });
+            });
+
+            doneList.on("value", function (snapshot)
+            {
+                snapshot.forEach(function (childSnapshot)
+                {
+                    itemCount2++;
+                });
+            });
+            count.set({itemCount1: itemCount1, itemCount2: itemCount2}); 
+        }
+
+        function ListLoad()
+        {
+            deleteAll();
+
+            var list1 = document.getElementById("List1");
+            if (list1 == null) {return;}
+
+            shoppingList.on("value", function (snapshot)
+            {
+                snapshot.forEach(function (childSnapshot)
+                {
+                    try
+                    {
+                        var childData = childSnapshot.val();
+                        var element = document.createElement("li");
+
+                        //チェックボックスの追加
+                        var cb = document.createElement("input");
+                        cb.type = "checkbox";
+                        cb.name = "checkbox"
+                        cb.value = childData.item;
+
+                        element.innerHTML = childData.item;
+                        element.appendChild(cb);
+                    
+                        list1.append(element);
+                    }
+                    catch{
+                        console.log("List1 Error.");
+                    }
+                });
+            });
+
+            var list2 = document.getElementById("List2");
+            doneList.on("value", function (snapshot)
+            {
+                snapshot.forEach(function (childSnapshot)
+                {
+                    var childData = childSnapshot.val();
+                    var element = document.createElement("li");
+
+                    //チェックボックスの追加
+                    var cb = document.createElement("input");
+                    cb.type = "checkbox";
+                    cb.name = "checkbox"
+                    cb.value = childData.item;
+
+                    element.innerHTML = childData.item ;
+                    element.appendChild(cb);
+                    list2.append(element);
+                });
+            });
+            updateCount();
+        }
+
+        window.onload = function ()
+        {
+            ListLoad();
+        }
+    </script>
+
+</head>
+
+<body>
+    <h2>買い物メモ</h2>
+    <div>
+        <form name="formUpload">
+            <div><input type="text" name="" id="item" placeholder="品物を追加">
+            <input type="button" value="追加" id="btnAddData" onclick="addData()">
+        </form>
+    </div>
+
+    <div class="List">
+        <div>
+            <h3>買い物リスト</h3>
+            <form name="form1">
+                <ul id="List1"></ul>
+            </form>
+        </div>
+        <div>
+            <h3>入手済みリスト</h3>
+            <form name="form2">
+                <ul id="List2"></ul>
+            </form>
+        </div>
+    </div>
+
+    <br>
+    <input type="button" value="入手完了" id="btnDone" onclick="done()">
+    <input type="button" value="削除" id="btnDelete" onclick="deleteItem()">
+</body>
+
+</html>
