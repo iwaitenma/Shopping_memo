@@ -3,7 +3,7 @@
 
 Firebase Realtime Database、JavaScriptを使って、買い物時に使えるメモアプリを作成しました
 
-アクセスURL：https://shopping-memo-c551e.web.app/
+アクセスURL：https://shopping-memo-c551e.firebaseapp.com/
 
 ## アプリ使用説明
 上部テキストボックスに品名を入力し「追加」ボタンを押下することで買い物リストに品物が反映されます
